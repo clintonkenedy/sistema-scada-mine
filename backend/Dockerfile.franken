@@ -1,102 +1,95 @@
-# ---- Stage 1: Composer deps con extensiones PHP (similar a tu base) ----
-FROM php:8.2-cli-alpine AS composer_stage
 
-# Herramienta de extensiones y Composer
-ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
-RUN chmod uga+x /usr/local/bin/install-php-extensions && sync
+FROM php:8.4-cli AS vendor
+WORKDIR /app
+#extenciones agregar aqui
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git unzip \
+    libzip-dev \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+  && docker-php-ext-configure gd --with-freetype --with-jpeg \
+  && docker-php-ext-install -j"$(nproc)" zip gd \
+  && rm -rf /var/lib/apt/lists/*
 
-RUN apk update && apk add --no-cache \
-    git curl unzip ca-certificates openssl
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Extensiones mínimas para composer (mbstring/zip/opcache como tu base)
-RUN install-php-extensions bcmath mbstring zip opcache
+COPY composer.json composer.lock ./
+RUN composer install \
+  --no-dev \
+  --prefer-dist \
+  --no-interaction \
+  --no-progress \
+  --optimize-autoloader \
+  --no-scripts
 
-# Instalar Composer
-RUN php -r "copy('https://getcomposer.org/installer','composer-setup.php');" \
- && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
- && rm composer-setup.php
+# -----------------------------
+# 2) Frontend build (Vite)
+# -----------------------------
+FROM node:20-alpine AS frontend
+# (uso Node 20 LTS, más estable para prod que 24)
 
 WORKDIR /app
-COPY composer.json composer.lock* ./
 
-# Sin scripts para evitar package:discover prematuro
-RUN composer config --global repo.packagist composer https://repo.packagist.org \
- && composer config --global secure-http true \
- && composer install --no-dev --prefer-dist --no-interaction --no-scripts
+COPY package.json package-lock.json ./
+RUN npm ci
 
-# Copiamos todo el proyecto ahora (aquí ya existe artisan)
-COPY . .
-# Optimiza autoload (aquí sí hay artisan si algún paquete lo requiere)
-RUN composer dump-autoload --optimize
-
-# ---- Stage 2: Build de assets con Vite (igual a tu base) ----
-FROM node:20-alpine AS assets_stage
-WORKDIR /app
-COPY package*.json ./
-RUN npm i
 COPY . .
 RUN npm run build
 
-# ---- Stage 3: Runtime FRANKENPHP (sustituye php-fpm) ----
-FROM dunglas/frankenphp:php8.2-alpine
 
-# php.ini prod
-RUN cp "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+FROM dunglas/frankenphp:php8.4
 
-# Herramienta de extensiones (incluimos pcntl para Octane)
-ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
-RUN chmod uga+x /usr/local/bin/install-php-extensions && sync
-
-# Paquetes del sistema equivalentes
-RUN apk update && apk add --no-cache icu-dev libpq-dev libzip-dev oniguruma-dev curl git
-
-# Extensiones PHP (alineado a tu lista) + pcntl + redis
-RUN install-php-extensions \
-    bcmath curl exif fileinfo gd intl mbstring opcache openssl \
-    pdo pdo_mysql pdo_pgsql pgsql sodium xsl zip pcntl redis
-
-# Directorio de la app (Franken usa /app)
 WORKDIR /app
 
-# Código + vendor desde composer_stage
-COPY --from=composer_stage /app /app
+# Extensiones necesarias (Postgres) //agregar extenciones aqui
+# Extensiones necesarias (Laravel 12 + Postgres + PDF/QR)
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+     libpq-dev \
+     libzip-dev \
+     libicu-dev \
+     libpng-dev \
+     libjpeg62-turbo-dev \
+     libfreetype6-dev \
+  && docker-php-ext-configure gd --with-freetype --with-jpeg \
+  && docker-php-ext-install -j"$(nproc)" \
+     pdo_pgsql \
+     pgsql \
+     zip \
+     intl \
+     gd \
+     bcmath \
+     opcache \
+     pcntl \
+  && rm -rf /var/lib/apt/lists/*
 
-# Assets construidos
-COPY --from=assets_stage /app/public/build /app/public/build
+# Config PHP personalizada
+# COPY ./prod/php/php.ini /usr/local/etc/php/php.ini
 
-# .env generator (igual que tu base)
-ARG APP_URL
-ENV APP_URL=${APP_URL}
-ARG ASSET_URL
-ENV ASSET_URL=${ASSET_URL}
-COPY ./scripts/generate-env.sh /usr/local/bin/generate-env.sh
-RUN chmod +x /usr/local/bin/generate-env.sh
+COPY ./prod/php/99-prod.ini /usr/local/etc/php/conf.d/99-prod.ini
+# Copiamos app (sin vendor/node_modules aún)
+COPY . /app
 
-# Config PHP personalizada (si la tienes)
-COPY ./php/php.ini /usr/local/etc/php/
-#opcional
+# Copiamos vendor desde etapa Composer
+COPY --from=vendor /app/vendor /app/vendor
 
-# Ajustes de OPcache para prod (como en tu base)
-RUN { \
-  echo "opcache.enable=1"; \
-  echo "opcache.enable_cli=1"; \
-  echo "opcache.validate_timestamps=0"; \
-  echo "opcache.max_accelerated_files=20000"; \
-  echo "opcache.memory_consumption=192"; \
-  echo "opcache.interned_strings_buffer=16"; \
-  echo "opcache.jit=0"; \
-} > /usr/local/etc/php/conf.d/opcache-prod.ini
-
-# Caddyfile para FrankenPHP
-COPY ./franken/Caddyfile /etc/frankenphp/Caddyfile
+# Copiamos build de Vite (Laravel típico: public/build)
+COPY --from=frontend /app/public/build /app/public/build
 
 # Permisos Laravel
-RUN chown -R www-data:www-data storage bootstrap/cache && \
-    chmod -R ug+rwX storage bootstrap/cache
+RUN mkdir -p storage bootstrap/cache \
+  && chown -R www-data:www-data /app/storage /app/bootstrap/cache
 
-EXPOSE 8080
+# Copia Caddyfile de prod dentro de la imagen
+COPY ./prod/Caddyfile /etc/frankenphp/Caddyfile
 
-# ENTRYPOINT: genera .env y arranca Octane+FrankenPHP
-# Puedes ajustar workers/requests según tu server
-ENTRYPOINT ["/bin/sh","-lc", "/usr/local/bin/generate-env.sh && php artisan octane:frankenphp --host=0.0.0.0 --port=8080 --caddyfile=/etc/frankenphp/Caddyfile --workers=auto --max-requests=500"]
-# ENTRYPOINT ["/bin/sh","-lc", "/usr/local/bin/generate-env.sh"]
+# Opcional: si quieres que compile caches en build (requiere APP_KEY en build, NO siempre conviene)
+# RUN php artisan config:cache && php artisan route:cache && php artisan view:cache
+
+COPY ./prod/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["frankenphp", "run", "--config", "/etc/frankenphp/Caddyfile"]
+
+EXPOSE 80
