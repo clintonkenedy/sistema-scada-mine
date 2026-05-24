@@ -52,6 +52,9 @@ RUN pnpm run build
 # ---- Stage 3: Runtime (nginx) ----
 FROM nginx:1.27-alpine AS runtime
 
+# Instalar wget para uso externo (Dokploy/Docker healthcheck si se necesita)
+RUN apk add --no-cache wget
+
 # Eliminar config default de nginx
 RUN rm -rf /usr/share/nginx/html/* /etc/nginx/conf.d/default.conf
 
@@ -61,9 +64,8 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Config custom (gzip + cache + security + SPA fallback)
 COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
 
-# Healthcheck endpoint
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost/healthz || exit 1
+# HEALTHCHECK removido — Dokploy/Traefik maneja healthcheck a nivel proxy
+# La ruta /healthz sigue disponible en nginx para uso externo
 
 EXPOSE 80
 
