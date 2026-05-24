@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\CamionController;
+use App\Http\Controllers\ConfiguracionScadaController;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\UsuarioController;
@@ -106,4 +107,16 @@ Route::middleware('auth:sanctum')->prefix('camiones')->group(function () {
 
     Route::post('/{camion}/toggle-activo', [CamionController::class, 'toggleActivo'])
         ->middleware('permission:camiones.toggle_activo');
+});
+
+// Configuración SCADA (parámetros runtime-tunables)
+Route::middleware('auth:sanctum')->prefix('configuracion-scada')->group(function () {
+    Route::get('/', [ConfiguracionScadaController::class, 'index'])
+        ->middleware('permission:configuracion.ver');
+
+    Route::get('/{clave}', [ConfiguracionScadaController::class, 'show'])
+        ->middleware('permission:configuracion.ver');
+
+    Route::put('/{clave}', [ConfiguracionScadaController::class, 'update'])
+        ->middleware('permission:configuracion.editar');
 });

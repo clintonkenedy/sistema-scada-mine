@@ -23,6 +23,7 @@ class CamionResource extends JsonResource
             'capacidad_toneladas' => $this->capacidad_toneladas,
             'estado_actual' => $this->estado_actual,
             'activo' => $this->activo,
+            'es_real' => $this->es_real,
             'ultima_lat' => $this->ultima_lat,
             'ultima_lng' => $this->ultima_lng,
             'ultima_actualizacion' => $this->ultima_actualizacion?->toIso8601String(),

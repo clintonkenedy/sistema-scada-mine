@@ -10,6 +10,7 @@ import {
   Users,
   Shield,
   Key,
+  Settings,
   LogOut,
 } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
@@ -38,6 +39,7 @@ const itemsNav: ItemNav[] = [
   { etiqueta: 'Usuarios', icono: Users, ruta: '/usuarios', permiso: 'usuarios.ver' },
   { etiqueta: 'Roles', icono: Shield, ruta: '/roles', permiso: 'roles.ver' },
   { etiqueta: 'Permisos', icono: Key, ruta: '/permisos', permiso: 'permisos.ver' },
+  { etiqueta: 'Configuración', icono: Settings, ruta: '/configuracion', permiso: 'configuracion.ver' },
 ]
 
 const claseBase =

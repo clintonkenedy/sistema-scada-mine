@@ -27,6 +27,7 @@ class Camion extends Model
         'capacidad_toneladas',
         'estado_actual',
         'activo',
+        'es_real',
         'ultima_lat',
         'ultima_lng',
         'ultima_actualizacion',
@@ -40,6 +41,7 @@ class Camion extends Model
         return [
             'capacidad_toneladas' => 'decimal:2',
             'activo' => 'boolean',
+            'es_real' => 'boolean',
             'ultima_actualizacion' => 'datetime',
             'ultima_lat' => 'float',
             'ultima_lng' => 'float',

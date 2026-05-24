@@ -1,0 +1,11 @@
+:80 {
+  root * /app/public
+  encode zstd br gzip
+  php_server
+
+  # Logs (útil en prod)
+  log {
+    output stdout
+    format console
+  }
+}

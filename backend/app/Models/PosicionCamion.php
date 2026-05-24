@@ -31,6 +31,13 @@ class PosicionCamion extends Model
         'ruta_actual',
         'timestamp',
         'created_at',
+        'calidad_gps',
+        'satelites',
+        'roll_grados',
+        'pitch_grados',
+        'tolva_cerrada',
+        'salud_via',
+        'temperatura_motor',
     ];
 
     /**
@@ -47,6 +54,13 @@ class PosicionCamion extends Model
             'combustible_porcentaje' => 'float',
             'timestamp' => 'datetime',
             'created_at' => 'datetime',
+            'calidad_gps' => 'integer',
+            'satelites' => 'integer',
+            'roll_grados' => 'float',
+            'pitch_grados' => 'float',
+            'tolva_cerrada' => 'boolean',
+            'salud_via' => 'integer',
+            'temperatura_motor' => 'integer',
         ];
     }
 

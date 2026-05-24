@@ -37,5 +37,18 @@ class CamionSeeder extends Seeder
                 ]
             );
         }
+
+        Camion::updateOrCreate(
+            ['codigo' => 'REAL-01'],
+            [
+                'codigo' => 'REAL-01',
+                'patente' => 'REAL-001',
+                'modelo' => 'Vehículo de seguimiento real (ESP32)',
+                'capacidad_toneladas' => 0,
+                'estado_actual' => 'en_ruta_vacio',
+                'activo' => true,
+                'es_real' => true,
+            ],
+        );
     }
 }

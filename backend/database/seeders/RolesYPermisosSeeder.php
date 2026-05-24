@@ -22,6 +22,7 @@ class RolesYPermisosSeeder extends Seeder
             'usuarios' => ['ver', 'crear', 'editar', 'eliminar', 'asignar_rol', 'toggle_activo'],
             'roles' => ['ver', 'crear', 'editar', 'eliminar', 'asignar_permisos'],
             'permisos' => ['ver', 'crear', 'editar', 'eliminar'],
+            'configuracion' => ['ver', 'editar'],
 
             // Módulos SCADA
             'dashboard' => ['ver'],
@@ -140,9 +141,15 @@ class RolesYPermisosSeeder extends Seeder
             ->whereIn('name', ['camiones.ver', 'camiones.editar', 'camiones.toggle_activo'])
             ->get();
 
+        // operador puede LEER la configuración SCADA pero NO editarla (es admin-only).
+        $permisosOperadorConfiguracion = Permission::where('guard_name', 'web')
+            ->whereIn('name', ['configuracion.ver'])
+            ->get();
+
         $permisosParaOperador = $permisosOperativos
             ->reject(fn ($p) => str_starts_with($p->name, 'camiones.'))
-            ->merge($permisosOperadorCamiones);
+            ->merge($permisosOperadorCamiones)
+            ->merge($permisosOperadorConfiguracion);
 
         $rolOperador = Role::firstOrCreate(['name' => 'operador', 'guard_name' => 'web']);
         $rolOperador->syncPermissions($permisosParaOperador);

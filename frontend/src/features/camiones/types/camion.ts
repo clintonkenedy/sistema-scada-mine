@@ -6,6 +6,7 @@ export type EstadoCamion =
   | 'descargando'
   | 'detenido'
   | 'mantenimiento'
+  | 'tiempo_muerto'
 
 /** Camión / equipo de transporte de la mina. */
 export interface Camion {

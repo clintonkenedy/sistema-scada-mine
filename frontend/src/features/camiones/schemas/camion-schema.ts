@@ -8,6 +8,7 @@ export const ESTADOS_CAMION = [
   'descargando',
   'detenido',
   'mantenimiento',
+  'tiempo_muerto',
 ] as const
 
 export const esquemaCrearCamion = z.object({

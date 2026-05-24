@@ -8,6 +8,7 @@ export const COLORES_ESTADO: Record<EstadoCamion, string> = {
   descargando: 'bg-orange-500 text-white',
   detenido: 'bg-red-500 text-white',
   mantenimiento: 'bg-gray-500 text-white',
+  tiempo_muerto: 'bg-amber-700 text-white',
 }
 
 /** Etiquetas legibles en español para cada estado_actual. */
@@ -18,4 +19,5 @@ export const ETIQUETAS_ESTADO: Record<EstadoCamion, string> = {
   descargando: 'Descargando',
   detenido: 'Detenido',
   mantenimiento: 'Mantenimiento',
+  tiempo_muerto: 'Tiempo muerto',
 }

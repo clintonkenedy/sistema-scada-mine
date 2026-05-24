@@ -14,6 +14,7 @@ Estado = Literal[
     "descargando",
     "detenido",
     "mantenimiento",
+    "tiempo_muerto",
 ]
 
 

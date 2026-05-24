@@ -34,6 +34,7 @@ class UpdateCamionRequest extends FormRequest
             'capacidad_toneladas' => ['sometimes', 'numeric', 'min:0', 'max:9999.99'],
             'estado_actual' => ['sometimes', 'string', 'in:en_ruta_vacio,en_carguio,en_ruta_cargado,descargando,detenido,mantenimiento'],
             'activo' => ['sometimes', 'boolean'],
+            'es_real' => ['sometimes', 'boolean'],
         ];
     }
 
@@ -60,6 +61,7 @@ class UpdateCamionRequest extends FormRequest
             'estado_actual.string' => 'El estado debe ser una cadena de texto.',
             'estado_actual.in' => 'El estado actual no es válido.',
             'activo.boolean' => 'El campo activo debe ser verdadero o falso.',
+            'es_real.boolean' => 'El campo es_real debe ser verdadero o falso.',
         ];
     }
 }

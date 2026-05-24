@@ -9,6 +9,7 @@ import { PaginaUsuarios } from '@/features/usuarios/components/pagina-usuarios'
 import { PaginaRoles } from '@/features/roles/components/pagina-roles'
 import { PaginaPermisos } from '@/features/permisos/components/pagina-permisos'
 import { PaginaCamiones } from '@/features/camiones'
+import { PaginaConfiguracion } from '@/features/configuracion'
 
 function App() {
   return (
@@ -36,6 +37,9 @@ function App() {
           </Route>
           <Route element={<RutaConPermiso permiso="camiones.ver" />}>
             <Route path="/camiones" element={<PaginaCamiones />} />
+          </Route>
+          <Route element={<RutaConPermiso permiso="configuracion.ver" />}>
+            <Route path="/configuracion" element={<PaginaConfiguracion />} />
           </Route>
         </Route>
       </Route>
