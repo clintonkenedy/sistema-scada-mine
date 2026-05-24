@@ -1,0 +1,31 @@
+{
+	# Habilita FrankenPHP y conf global del server
+	frankenphp
+	# Si vas detrás de un reverse-proxy (Traefik/Nginx), confía en sus cabeceras:
+	servers {
+		# Ajusta las redes según tu entorno si quieres ser más estricto
+		trusted_proxies static 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16
+	}
+}
+
+# Usamos la variable de entorno SERVER_NAME (por defecto :8080)
+{$SERVER_NAME} {
+	# Raíz al public/ de Laravel
+	root * /app/public
+
+	# Compresión moderna
+	encode zstd gzip
+
+	# Servidor PHP integrado de FrankenPHP
+	php_server {
+		# Sirve archivos y, si no existen, despacha a index.php (estilo try_files)
+		try_files {path} index.php
+	}
+
+	# Cache fuerte para assets versionados de Vite (public/build)
+	@static path /build/*
+	header @static Cache-Control "public, max-age=31536000, immutable"
+
+	# Archivos estáticos
+	file_server
+}
