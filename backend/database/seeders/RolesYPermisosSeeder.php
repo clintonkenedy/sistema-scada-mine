@@ -29,6 +29,7 @@ class RolesYPermisosSeeder extends Seeder
             'mediciones' => ['ver', 'exportar'],
             'alertas' => ['ver', 'reconocer', 'silenciar', 'configurar'],
             'equipos' => ['ver', 'crear', 'editar', 'eliminar'],
+            'camiones' => ['ver', 'crear', 'editar', 'eliminar', 'toggle_activo'],
             'rutas' => ['ver', 'crear', 'editar', 'eliminar'],
             'reportes' => ['ver', 'generar', 'exportar'],
         ];
@@ -111,7 +112,7 @@ class RolesYPermisosSeeder extends Seeder
         $todosLosPermisos = Permission::where('guard_name', 'web')->get();
 
         // Permisos de módulos operativos SCADA (sin gestión RBAC)
-        $modulosOperativos = ['dashboard', 'sensores', 'mediciones', 'alertas', 'equipos', 'rutas', 'reportes'];
+        $modulosOperativos = ['dashboard', 'sensores', 'mediciones', 'alertas', 'equipos', 'camiones', 'rutas', 'reportes'];
         $permisosOperativos = Permission::where('guard_name', 'web')
             ->where(function ($query) use ($modulosOperativos) {
                 foreach ($modulosOperativos as $modulo) {
@@ -133,11 +134,20 @@ class RolesYPermisosSeeder extends Seeder
         $rolAdministrador = Role::firstOrCreate(['name' => 'administrador', 'guard_name' => 'web']);
         $rolAdministrador->syncPermissions($todosLosPermisos);
 
-        // operador — módulos operativos completos; SIN gestión RBAC
-        $rolOperador = Role::firstOrCreate(['name' => 'operador', 'guard_name' => 'web']);
-        $rolOperador->syncPermissions($permisosOperativos);
+        // operador — módulos operativos completos; SIN gestión RBAC.
+        // Subset acotado para camiones (sin crear ni eliminar — esos son de admin).
+        $permisosOperadorCamiones = Permission::where('guard_name', 'web')
+            ->whereIn('name', ['camiones.ver', 'camiones.editar', 'camiones.toggle_activo'])
+            ->get();
 
-        // consulta — solo *.ver en módulos operativos
+        $permisosParaOperador = $permisosOperativos
+            ->reject(fn ($p) => str_starts_with($p->name, 'camiones.'))
+            ->merge($permisosOperadorCamiones);
+
+        $rolOperador = Role::firstOrCreate(['name' => 'operador', 'guard_name' => 'web']);
+        $rolOperador->syncPermissions($permisosParaOperador);
+
+        // consulta — solo *.ver en módulos operativos (incluye camiones.ver)
         $rolConsulta = Role::firstOrCreate(['name' => 'consulta', 'guard_name' => 'web']);
         $rolConsulta->syncPermissions($permisosConsulta);
     }

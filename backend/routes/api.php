@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CamionController;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\UsuarioController;
@@ -81,4 +82,28 @@ Route::middleware(['auth:sanctum'])->prefix('roles')->group(function () {
 
     Route::delete('/{rol}', [RolController::class, 'destroy'])
         ->middleware('permission:roles.eliminar');
+});
+
+// Gestión de camiones
+Route::middleware('auth:sanctum')->prefix('camiones')->group(function () {
+    Route::get('/', [CamionController::class, 'index'])
+        ->middleware('permission:camiones.ver');
+
+    Route::post('/', [CamionController::class, 'store'])
+        ->middleware('permission:camiones.crear');
+
+    Route::get('/{camion}', [CamionController::class, 'show'])
+        ->middleware('permission:camiones.ver');
+
+    Route::put('/{camion}', [CamionController::class, 'update'])
+        ->middleware('permission:camiones.editar');
+
+    Route::patch('/{camion}', [CamionController::class, 'update'])
+        ->middleware('permission:camiones.editar');
+
+    Route::delete('/{camion}', [CamionController::class, 'destroy'])
+        ->middleware('permission:camiones.eliminar');
+
+    Route::post('/{camion}/toggle-activo', [CamionController::class, 'toggleActivo'])
+        ->middleware('permission:camiones.toggle_activo');
 });

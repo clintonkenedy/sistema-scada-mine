@@ -8,6 +8,7 @@ import { PaginaSinAcceso } from '@/shared/components/layout/pagina-sin-acceso'
 import { PaginaUsuarios } from '@/features/usuarios/components/pagina-usuarios'
 import { PaginaRoles } from '@/features/roles/components/pagina-roles'
 import { PaginaPermisos } from '@/features/permisos/components/pagina-permisos'
+import { PaginaCamiones } from '@/features/camiones'
 
 function App() {
   return (
@@ -32,6 +33,9 @@ function App() {
           </Route>
           <Route element={<RutaConPermiso permiso="permisos.ver" />}>
             <Route path="/permisos" element={<PaginaPermisos />} />
+          </Route>
+          <Route element={<RutaConPermiso permiso="camiones.ver" />}>
+            <Route path="/camiones" element={<PaginaCamiones />} />
           </Route>
         </Route>
       </Route>

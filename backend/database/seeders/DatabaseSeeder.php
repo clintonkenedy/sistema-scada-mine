@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             UsuarioAdminSeeder::class,
             RolesYPermisosSeeder::class,
             UsuarioSeeder::class,
+            CamionSeeder::class,
         ]);
     }
 }
