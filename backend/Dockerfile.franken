@@ -33,7 +33,7 @@ RUN composer dump-autoload --optimize
 FROM node:20-alpine AS assets_stage
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN npm i
 COPY . .
 RUN npm run build
 
