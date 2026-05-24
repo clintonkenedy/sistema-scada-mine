@@ -52,9 +52,9 @@ class ConfiguracionScadaSeeder extends Seeder
             ],
             [
                 'clave' => 'modo_operacion',
-                'valor' => 'simulacion',
+                'valor' => 'real',
                 'tipo' => 'texto',
-                'descripcion' => 'Modo de operación del sistema. "simulacion" mueve los 10 camiones por el GeoJSON. "real" conecta a un WebSocket externo (ESP32) y solo muestra el camión REAL-01.',
+                'descripcion' => 'Modo de operación del sistema. "simulacion" mueve los 10 camiones por el GeoJSON. "real" conecta a un WebSocket externo (ESP32) y solo muestra el camión REAL-01. Default actual: real (modo único). El modo "simulacion" queda disponible para development pero requiere intervención manual en DB.',
                 'unidad' => null,
                 'minimo' => null,
                 'maximo' => null,

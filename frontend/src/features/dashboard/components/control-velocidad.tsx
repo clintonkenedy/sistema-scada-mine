@@ -16,7 +16,8 @@ import type {
   ModoOperacion,
 } from '@/shared/hooks/use-websocket-camiones'
 
-const VELOCIDADES = [1, 5, 10, 50] as const
+const _VELOCIDADES = [1, 5, 10, 50] as const
+void _VELOCIDADES
 const URL_REAL_DEFAULT = 'ws://localhost:8766'
 
 type Props = {
@@ -48,7 +49,7 @@ export function ControlVelocidad({
   )
   const cfgUrl = configs?.find((c) => c.clave === 'url_websocket_real')
 
-  const velocidadActual = cfgVelocidad ? Number(cfgVelocidad.valor) : 1
+  const _velocidadActual = cfgVelocidad ? Number(cfgVelocidad.valor) : 1
   const urlActualConfig = cfgUrl?.valor ?? URL_REAL_DEFAULT
 
   const [urlInput, setUrlInput] = useState(urlActualConfig)
@@ -64,7 +65,7 @@ export function ControlVelocidad({
     setUrlInput(urlActualConfig)
   }, [urlActualConfig])
 
-  const esperandoCambioModo = modoOptimista !== modoActual
+  const _esperandoCambioModo = modoOptimista !== modoActual
 
   function cambiarModo(nuevoModo: ModoOperacion) {
     if (nuevoModo === modoOptimista) return
@@ -79,12 +80,16 @@ export function ControlVelocidad({
     )
   }
 
-  function cambiarVelocidad(v: number) {
+  function _cambiarVelocidad(v: number) {
     mutacion.mutate({
       clave: 'simulador_speed_multiplier',
       valor: String(v),
     })
   }
+  // Referencias a símbolos preservados como dead code reversible (bloque UI comentado).
+  void _velocidadActual
+  void _esperandoCambioModo
+  void _cambiarVelocidad
 
   function aplicarUrl() {
     if (urlInput !== urlActualConfig) {
@@ -110,7 +115,9 @@ export function ControlVelocidad({
         </span>
       </div>
 
-      {/* Toggle modo */}
+      {/* Toggle Modo oculto — sistema en modo real único.
+          Para revertir: descomentar el bloque siguiente */}
+      {/*
       <div className="mb-3">
         <Label className="mb-1 block text-xs text-muted-foreground">Modo</Label>
         <div className="flex gap-1">
@@ -145,29 +152,19 @@ export function ControlVelocidad({
           </p>
         )}
       </div>
+      */}
 
-      {/* Velocidad — solo en simulación */}
-      {modoOptimista === 'simulacion' && (
-        <div className="mb-3">
-          <Label className="mb-1 block text-xs text-muted-foreground">
-            Velocidad simulador
-          </Label>
-          <div className="flex gap-1">
-            {VELOCIDADES.map((v) => (
-              <Button
-                key={v}
-                size="sm"
-                variant={v === velocidadActual ? 'default' : 'outline'}
-                onClick={() => cambiarVelocidad(v)}
-                disabled={mutacion.isPending}
-                className="flex-1"
-              >
-                {v}x
-              </Button>
-            ))}
-          </div>
+      {/* Reemplazo: header fijo "Modo Real" */}
+      <div className="mb-3">
+        <div className="flex items-center justify-between">
+          <Label className="text-xs text-muted-foreground">Modo</Label>
+          <span className="text-xs font-semibold bg-amber-400/20 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded">
+            Real (ESP32)
+          </span>
         </div>
-      )}
+      </div>
+
+      {/* Velocidad simulador oculta — configurable desde /configuracion */}
 
       {/* Conexión real — SIEMPRE visible */}
       <div className="space-y-2 border-t pt-3">
@@ -213,20 +210,12 @@ export function ControlVelocidad({
 
 function EstadoProxy({
   estado,
-  modoActual,
+  modoActual: _modoActual,
 }: {
   estado: EstadoProxyReal
   modoActual: ModoOperacion
 }) {
-  if (modoActual === 'simulacion') {
-    return (
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-        <WifiOff className="h-3 w-3" />
-        <span>Modo simulación activo — conexión real inactiva</span>
-      </div>
-    )
-  }
-
+  // Ya no chequeamos modo — siempre mostramos estado real (modo real único en UI)
   if (!estado) {
     return (
       <div className="flex items-center gap-2 text-xs text-muted-foreground">
