@@ -28,9 +28,9 @@ class RolesYPermisosSeeder extends Seeder
             'dashboard' => ['ver'],
             'sensores' => ['ver', 'crear', 'editar', 'eliminar', 'calibrar'],
             'mediciones' => ['ver', 'exportar'],
-            'alertas' => ['ver', 'reconocer', 'silenciar', 'configurar'],
+            'alertas' => ['ver', 'marcar_leida'],
             'equipos' => ['ver', 'crear', 'editar', 'eliminar'],
-            'camiones' => ['ver', 'crear', 'editar', 'eliminar', 'toggle_activo'],
+            'camiones' => ['ver', 'crear', 'editar', 'eliminar', 'toggle_activo', 'ver_historico'],
             'rutas' => ['ver', 'crear', 'editar', 'eliminar'],
             'reportes' => ['ver', 'generar', 'exportar'],
         ];
@@ -138,7 +138,7 @@ class RolesYPermisosSeeder extends Seeder
         // operador — módulos operativos completos; SIN gestión RBAC.
         // Subset acotado para camiones (sin crear ni eliminar — esos son de admin).
         $permisosOperadorCamiones = Permission::where('guard_name', 'web')
-            ->whereIn('name', ['camiones.ver', 'camiones.editar', 'camiones.toggle_activo'])
+            ->whereIn('name', ['camiones.ver', 'camiones.editar', 'camiones.toggle_activo', 'camiones.ver_historico'])
             ->get();
 
         // operador puede LEER la configuración SCADA pero NO editarla (es admin-only).
@@ -154,9 +154,13 @@ class RolesYPermisosSeeder extends Seeder
         $rolOperador = Role::firstOrCreate(['name' => 'operador', 'guard_name' => 'web']);
         $rolOperador->syncPermissions($permisosParaOperador);
 
-        // consulta — solo *.ver en módulos operativos (incluye camiones.ver)
+        // consulta — solo lectura: *.ver en módulos operativos + camiones.ver_historico
+        $permisosConsultaHistorico = Permission::where('guard_name', 'web')
+            ->whereIn('name', ['camiones.ver_historico'])
+            ->get();
+
         $rolConsulta = Role::firstOrCreate(['name' => 'consulta', 'guard_name' => 'web']);
-        $rolConsulta->syncPermissions($permisosConsulta);
+        $rolConsulta->syncPermissions($permisosConsulta->merge($permisosConsultaHistorico));
     }
 
     /**

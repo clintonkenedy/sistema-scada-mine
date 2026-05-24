@@ -17,6 +17,8 @@ export interface Camion {
   capacidad_toneladas: number
   estado_actual: EstadoCamion
   activo: boolean
+  /** True si el camión es el camión real (REAL-01) puenteado por el ESP32. */
+  es_real: boolean
   ultima_lat: number | null
   ultima_lng: number | null
   ultima_actualizacion: string | null

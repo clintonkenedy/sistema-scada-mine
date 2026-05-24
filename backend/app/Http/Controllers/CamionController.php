@@ -27,6 +27,7 @@ class CamionController extends Controller
                 AllowedFilter::partial('modelo'),
                 AllowedFilter::exact('estado_actual'),
                 AllowedFilter::exact('activo'),
+                AllowedFilter::exact('es_real'),
             ])
             ->allowedSorts(['codigo', 'modelo', 'capacidad_toneladas', 'created_at'])
             ->defaultSort('codigo')

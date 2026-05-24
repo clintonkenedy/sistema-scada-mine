@@ -10,6 +10,8 @@ import { PaginaRoles } from '@/features/roles/components/pagina-roles'
 import { PaginaPermisos } from '@/features/permisos/components/pagina-permisos'
 import { PaginaCamiones } from '@/features/camiones'
 import { PaginaConfiguracion } from '@/features/configuracion'
+import { PaginaKpisReal } from '@/features/kpis-real'
+import { PaginaAlertas } from '@/features/alertas'
 
 function App() {
   return (
@@ -38,8 +40,14 @@ function App() {
           <Route element={<RutaConPermiso permiso="camiones.ver" />}>
             <Route path="/camiones" element={<PaginaCamiones />} />
           </Route>
+          <Route element={<RutaConPermiso permiso="camiones.ver_historico" />}>
+            <Route path="/kpis-real" element={<PaginaKpisReal />} />
+          </Route>
           <Route element={<RutaConPermiso permiso="configuracion.ver" />}>
             <Route path="/configuracion" element={<PaginaConfiguracion />} />
+          </Route>
+          <Route element={<RutaConPermiso permiso="alertas.ver" />}>
+            <Route path="/alertas" element={<PaginaAlertas />} />
           </Route>
         </Route>
       </Route>

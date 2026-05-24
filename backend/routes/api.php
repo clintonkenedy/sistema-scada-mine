@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\AlertaController;
 use App\Http\Controllers\CamionController;
 use App\Http\Controllers\ConfiguracionScadaController;
+use App\Http\Controllers\HistoricoCamionController;
 use App\Http\Controllers\PermisoController;
 use App\Http\Controllers\RolController;
 use App\Http\Controllers\UsuarioController;
@@ -107,6 +109,27 @@ Route::middleware('auth:sanctum')->prefix('camiones')->group(function () {
 
     Route::post('/{camion}/toggle-activo', [CamionController::class, 'toggleActivo'])
         ->middleware('permission:camiones.toggle_activo');
+
+    Route::get('/{camion}/historico', HistoricoCamionController::class)
+        ->middleware('permission:camiones.ver_historico');
+});
+
+// Alertas SCADA (eventos generados por el backend Python)
+Route::middleware('auth:sanctum')->prefix('alertas')->group(function () {
+    Route::get('/', [AlertaController::class, 'index'])
+        ->middleware('permission:alertas.ver');
+
+    Route::get('/contadores', [AlertaController::class, 'contadores'])
+        ->middleware('permission:alertas.ver');
+
+    Route::post('/marcar-todas-leidas', [AlertaController::class, 'marcarTodasLeidas'])
+        ->middleware('permission:alertas.marcar_leida');
+
+    Route::get('/{alerta}', [AlertaController::class, 'show'])
+        ->middleware('permission:alertas.ver');
+
+    Route::patch('/{alerta}/marcar-leida', [AlertaController::class, 'marcarLeida'])
+        ->middleware('permission:alertas.marcar_leida');
 });
 
 // Configuración SCADA (parámetros runtime-tunables)
