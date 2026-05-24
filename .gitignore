@@ -1,0 +1,37 @@
+# ============================================================================
+# AI agent configuration — temporarily ignored per user request
+# (user will un-ignore these manually later)
+# ============================================================================
+
+# Root-level AI guides
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.cursorrules
+
+# Sub-project AI guides
+backend/AGENTS.md
+backend/CLAUDE.md
+backend/GEMINI.md
+frontend/AGENTS.md
+frontend/CLAUDE.md
+frontend/GEMINI.md
+
+# Skills directory (entire folder + generated copies)
+skills/
+
+# AI tool directories
+.cursor/
+.github/copilot-instructions.md
+.aider*
+
+# OS / IDE noise
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Environment files (safety net — also covered by sub-projects)
+.env
+.env.local
+.env.*.local
