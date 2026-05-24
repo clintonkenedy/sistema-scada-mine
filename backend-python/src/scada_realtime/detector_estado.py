@@ -80,6 +80,11 @@ class DetectorEstado:
                 return nombre, accion
         return None
 
+    def zona_actual(self, lat: float, lng: float) -> str | None:
+        """Devuelve el nombre de la zona operativa que contiene el punto, o None."""
+        z = self._zona_que_contiene(lat, lng)
+        return z[0] if z else None
+
     def detectar(
         self,
         camion_id: int,

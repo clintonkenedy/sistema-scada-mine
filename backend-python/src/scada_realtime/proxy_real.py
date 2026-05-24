@@ -27,6 +27,7 @@ from websockets.asyncio.client import connect as ws_connect
 from websockets.exceptions import ConnectionClosed, InvalidURI
 
 from scada_realtime.detector_estado import DetectorEstado
+from scada_realtime.emisor_alertas import EmisorAlertas
 from scada_realtime.persistencia import Persistencia
 from scada_realtime.servidor_ws import ServidorWebSocket
 
@@ -73,6 +74,7 @@ class ProxyReal:
         persistencia: Persistencia,
         servidor: ServidorWebSocket,
         detector: DetectorEstado,
+        emisor_alertas: EmisorAlertas,
         camion_real_id: int,
         codigo_camion: str = "REAL-01",
     ) -> None:
@@ -80,6 +82,7 @@ class ProxyReal:
         self.persistencia = persistencia
         self.servidor = servidor
         self.detector = detector
+        self.emisor_alertas = emisor_alertas
         self.camion_real_id = camion_real_id
         self.codigo_camion = codigo_camion
 
@@ -288,6 +291,23 @@ class ProxyReal:
 
         # GPS llega aprox 1Hz; el detector trackea tiempo acumulado interno
         estado = self.detector.detectar(self.camion_real_id, tele.lat, tele.lng, velocidad_kmh, 1.0)
+
+        # Evaluar alertas (edge detection: solo emite en cambios)
+        try:
+            await self.emisor_alertas.evaluar(
+                camion_id=self.camion_real_id,
+                codigo_camion=self.codigo_camion,
+                lat=tele.lat,
+                lng=tele.lng,
+                estado_actual=estado,
+                zona_actual=self.detector.zona_actual(tele.lat, tele.lng),
+                calidad_gps=tele.calidad_gps,
+                temperatura_motor=tele.temperatura_motor,
+                salud_via=tele.salud_via,
+                tolva_cerrada=tele.tolva_cerrada,
+            )
+        except Exception as e:
+            logger.error("Error evaluando alertas: {}", e)
 
         try:
             await self.persistencia.insertar_posicion(

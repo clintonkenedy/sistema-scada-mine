@@ -13,6 +13,7 @@ from websockets.asyncio.server import serve
 from scada_realtime.config import settings
 from scada_realtime.configuracion_dinamica import ConfiguracionDinamica
 from scada_realtime.detector_estado import DetectorEstado
+from scada_realtime.emisor_alertas import EmisorAlertas
 from scada_realtime.geojson_loader import cargar_geojson
 from scada_realtime.persistencia import Persistencia
 from scada_realtime.proxy_real import ProxyReal
@@ -48,6 +49,7 @@ async def orquestador_modo(
     persistencia: Persistencia,
     servidor: ServidorWebSocket,
     detector: DetectorEstado,
+    emisor_alertas: EmisorAlertas,
 ) -> None:
     """Loop que monitorea modo_operacion y switchea entre simulador y proxy."""
     modo_actual = "simulacion"
@@ -76,6 +78,7 @@ async def orquestador_modo(
                                 persistencia=persistencia,
                                 servidor=servidor,
                                 detector=detector,
+                                emisor_alertas=emisor_alertas,
                                 camion_real_id=camion_real_id,
                             )
                             await nuevo_proxy.iniciar()
@@ -100,6 +103,7 @@ async def orquestador_modo(
                     persistencia=persistencia,
                     servidor=servidor,
                     detector=detector,
+                    emisor_alertas=emisor_alertas,
                     camion_real_id=camion_real_id,
                 )
                 await proxy.iniciar()
@@ -156,10 +160,15 @@ async def main() -> None:
     simulador = Simulador(rutas, persistencia, servidor, detector, config)
     await simulador.inicializar()
 
+    # 6b) Emisor de alertas (edge detection sobre el REAL)
+    emisor_alertas = EmisorAlertas(persistencia, servidor)
+
     # 7) Orquestador de modo (simulacion ↔ real)
     proxy_holder: dict[str, Any] = {"proxy": None}
     tarea_orquestador = asyncio.create_task(
-        orquestador_modo(config, simulador, proxy_holder, persistencia, servidor, detector)
+        orquestador_modo(
+            config, simulador, proxy_holder, persistencia, servidor, detector, emisor_alertas
+        )
     )
 
     # 8) WS server + loop

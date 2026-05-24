@@ -140,3 +140,22 @@ class Persistencia:
                 """,
                 (lat, lng, estado, ts, ts, camion_id),
             )
+
+    async def insertar_alerta(self, datos: dict[str, Any]) -> None:
+        """Inserta una alerta en la tabla `alertas`. `contexto` debe venir como
+        string JSON (o None) — se castea a jsonb dentro del SQL."""
+        assert self._pool is not None
+        async with self._pool.connection() as conn, conn.cursor() as cur:
+            await cur.execute(
+                """
+                INSERT INTO alertas
+                    (camion_id, tipo, severidad, titulo, mensaje, lat, lng,
+                     zona_nombre, estado_anterior, estado_nuevo, contexto,
+                     timestamp, created_at)
+                VALUES (%(camion_id)s, %(tipo)s, %(severidad)s, %(titulo)s,
+                        %(mensaje)s, %(lat)s, %(lng)s, %(zona_nombre)s,
+                        %(estado_anterior)s, %(estado_nuevo)s, %(contexto)s::jsonb,
+                        %(timestamp)s, %(timestamp)s)
+                """,
+                datos,
+            )

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 import type { EstadoCamion } from '@/features/camiones/types/camion'
 
 /** Snapshot en vivo de un camión emitido por el simulador Python por WebSocket. */
@@ -81,11 +82,33 @@ type MensajeEstadoProxyReal = {
   mensaje?: string
 }
 
+type SeveridadAlertaWs = 'info' | 'warning' | 'danger'
+
+type MensajeAlerta = {
+  tipo: 'alerta'
+  alerta: {
+    camion_id: number
+    codigo: string
+    tipo: string
+    severidad: SeveridadAlertaWs
+    titulo: string
+    mensaje: string | null
+    lat: number | null
+    lng: number | null
+    zona_nombre: string | null
+    estado_anterior: string | null
+    estado_nuevo: string | null
+    contexto: Record<string, unknown> | null
+    timestamp: string
+  }
+}
+
 type MensajeServidor =
   | MensajeActualizacion
   | MensajeCambioEstado
   | MensajeModoCambiado
   | MensajeEstadoProxyReal
+  | MensajeAlerta
 
 const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8765'
 
@@ -155,6 +178,16 @@ export function useWebSocketCamiones() {
               mensaje: mensaje.mensaje ?? null,
               timestamp: mensaje.timestamp,
             })
+          } else if (mensaje.tipo === 'alerta') {
+            const alerta = mensaje.alerta
+            const descripcion = alerta.mensaje ?? undefined
+            if (alerta.severidad === 'danger') {
+              toast.error(alerta.titulo, { description: descripcion, duration: 8000 })
+            } else if (alerta.severidad === 'warning') {
+              toast.warning(alerta.titulo, { description: descripcion, duration: 6000 })
+            } else {
+              toast.info(alerta.titulo, { description: descripcion, duration: 4000 })
+            }
           }
           // 'cambio_estado': el snapshot siguiente ya trae el nuevo estado, no
           // mutamos acá. Espacio reservado para futuras notificaciones toast.
