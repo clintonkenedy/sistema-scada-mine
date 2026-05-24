@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { PaginaLogin } from '@/features/autenticacion'
+import { BYPASS_AUTH_HABILITADO } from '@/features/autenticacion/lib/usuario-bypass'
 import { PaginaDashboard } from '@/features/dashboard'
 import { RutaProtegida } from '@/shared/components/layout/ruta-protegida'
 import { RutaConPermiso } from '@/shared/components/layout/ruta-con-permiso'
@@ -16,8 +17,13 @@ import { PaginaAlertas } from '@/features/alertas'
 function App() {
   return (
     <Routes>
-      {/* Ruta pública */}
-      <Route path="/login" element={<PaginaLogin />} />
+      {/* Ruta pública — si el bypass está habilitado, /login redirige al dashboard */}
+      <Route
+        path="/login"
+        element={
+          BYPASS_AUTH_HABILITADO ? <Navigate to="/dashboard" replace /> : <PaginaLogin />
+        }
+      />
 
       {/* Rutas protegidas — guard verifica sesión */}
       <Route element={<RutaProtegida />}>

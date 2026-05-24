@@ -1,13 +1,13 @@
 import {
   LayoutDashboard,
-  Activity,
-  TrendingUp,
+  // Activity, // re-habilitar junto al item Sensores
+  // TrendingUp, // re-habilitar junto al item Mediciones
   AlertTriangle,
-  Truck,
+  // Truck, // re-habilitar junto al item Equipos
   TruckElectric,
   BarChart3,
-  Route,
-  FileText,
+  // Route, // re-habilitar junto al item Rutas GPS
+  // FileText, // re-habilitar junto al item Reportes
   Users,
   Shield,
   Key,
@@ -31,14 +31,17 @@ interface ItemNav {
 
 const itemsNav: ItemNav[] = [
   { etiqueta: 'Dashboard', icono: LayoutDashboard, ruta: '/dashboard', permiso: 'dashboard.ver' },
-  { etiqueta: 'Sensores', icono: Activity, ruta: '/sensores', permiso: 'sensores.ver' },
-  { etiqueta: 'Mediciones', icono: TrendingUp, ruta: '/mediciones', permiso: 'mediciones.ver' },
+  // TODO: re-habilitar cuando se implementen los features correspondientes.
+  // Features pendientes: sensores/, mediciones/, equipos/, rutas/, reportes/.
+  // Ocultados porque las rutas no están registradas en App.tsx y caen en 404.
+  // { etiqueta: 'Sensores', icono: Activity, ruta: '/sensores', permiso: 'sensores.ver' },
+  // { etiqueta: 'Mediciones', icono: TrendingUp, ruta: '/mediciones', permiso: 'mediciones.ver' },
   { etiqueta: 'Alertas', icono: AlertTriangle, ruta: '/alertas', permiso: 'alertas.ver' },
-  { etiqueta: 'Equipos', icono: Truck, ruta: '/equipos', permiso: 'equipos.ver' },
+  // { etiqueta: 'Equipos', icono: Truck, ruta: '/equipos', permiso: 'equipos.ver' },
   { etiqueta: 'Camiones', icono: TruckElectric, ruta: '/camiones', permiso: 'camiones.ver' },
   { etiqueta: 'KPIs Real', icono: BarChart3, ruta: '/kpis-real', permiso: 'camiones.ver_historico' },
-  { etiqueta: 'Rutas GPS', icono: Route, ruta: '/rutas', permiso: 'rutas.ver' },
-  { etiqueta: 'Reportes', icono: FileText, ruta: '/reportes', permiso: 'reportes.ver' },
+  // { etiqueta: 'Rutas GPS', icono: Route, ruta: '/rutas', permiso: 'rutas.ver' },
+  // { etiqueta: 'Reportes', icono: FileText, ruta: '/reportes', permiso: 'reportes.ver' },
   { etiqueta: 'Usuarios', icono: Users, ruta: '/usuarios', permiso: 'usuarios.ver' },
   { etiqueta: 'Roles', icono: Shield, ruta: '/roles', permiso: 'roles.ver' },
   { etiqueta: 'Permisos', icono: Key, ruta: '/permisos', permiso: 'permisos.ver' },

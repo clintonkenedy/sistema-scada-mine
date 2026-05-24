@@ -13,8 +13,8 @@ export function PaginaSinAcceso() {
           administrador del sistema.
         </p>
       </div>
-      <Link to="/mapa" className={buttonVariants({ variant: 'default' })}>
-        Volver al mapa
+      <Link to="/dashboard" className={buttonVariants({ variant: 'default' })}>
+        Volver al dashboard
       </Link>
     </div>
   )
