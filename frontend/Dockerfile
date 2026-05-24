@@ -1,24 +1,69 @@
+# syntax=docker/dockerfile:1.7
+
+# ============================================================================
+# Build args para Vite (configurar en Dokploy)
+# ============================================================================
+# Vite hace bake-in de las VITE_* en el bundle DURANTE el build.
+# Estas vars DEBEN setearse en Dokploy → Build Args, no en runtime.
+#
+# Variables esperadas:
+#   VITE_API_URL          → URL del backend Laravel (ej: https://api.tudominio.com)
+#   VITE_WS_URL           → URL del WebSocket Python (ej: wss://ws.tudominio.com)
+#   VITE_MAPBOX_TOKEN     → Token público de Mapbox (pk.xxx)
+# ============================================================================
+
+# ---- Stage 1: Dependencies ----
+FROM node:22-alpine AS deps
+
+WORKDIR /app
+
+# pnpm matchea la versión local (evita errores de lockfile)
+RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
+
+COPY package.json pnpm-lock.yaml ./
+
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
+
+
+# ---- Stage 2: Build ----
 FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
+RUN corepack enable && corepack prepare pnpm@10.33.0 --activate
 
-COPY package.json pnpm-lock.yaml ./
+# Build args — los pasa Dokploy en build time
+ARG VITE_API_URL=http://localhost:8000
+ARG VITE_WS_URL=ws://localhost:8765
+ARG VITE_MAPBOX_TOKEN=__PEGAR_TOKEN_AQUI__
 
-RUN pnpm install --frozen-lockfile
+# Vite necesita las ENV durante `pnpm run build` para hacer bake-in
+ENV VITE_API_URL=${VITE_API_URL}
+ENV VITE_WS_URL=${VITE_WS_URL}
+ENV VITE_MAPBOX_TOKEN=${VITE_MAPBOX_TOKEN}
 
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 RUN pnpm run build
 
-FROM nginx:alpine
 
-RUN rm -rf /usr/share/nginx/html/*
+# ---- Stage 3: Runtime (nginx) ----
+FROM nginx:1.27-alpine AS runtime
 
+# Eliminar config default de nginx
+RUN rm -rf /usr/share/nginx/html/* /etc/nginx/conf.d/default.conf
+
+# Copiar build estático
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# Config custom (gzip + cache + security + SPA fallback)
 COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
+
+# Healthcheck endpoint
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost/healthz || exit 1
 
 EXPOSE 80
 

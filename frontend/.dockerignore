@@ -1,0 +1,44 @@
+# Node
+node_modules
+npm-debug.log
+pnpm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Build outputs
+dist
+build
+coverage
+.next
+.turbo
+
+# Env (NEVER copy real env into image — build args handle it)
+.env
+.env.local
+.env.*.local
+
+# Git
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+logs
+
+# Test artifacts
+.vitest
+.nyc_output
+
+# Misc
+README.md
+*.md
+Dockerfile
+.dockerignore

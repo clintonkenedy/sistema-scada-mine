@@ -66,7 +66,8 @@ export function FormularioCamion({
   const esEdicion = resto.modo === 'editar'
 
   const formaCrear = useForm<EsquemaCrearCamion>({
-    resolver: zodResolver(esquemaCrearCamion),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(esquemaCrearCamion) as any,
     defaultValues: {
       codigo: '',
       patente: '',
@@ -78,7 +79,8 @@ export function FormularioCamion({
   })
 
   const formaEditar = useForm<EsquemaEditarCamion>({
-    resolver: zodResolver(esquemaEditarCamion),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    resolver: zodResolver(esquemaEditarCamion) as any,
     defaultValues: {
       codigo: '',
       patente: '',
